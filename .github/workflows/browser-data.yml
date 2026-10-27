@@ -1,0 +1,71 @@
+name: Browser data
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: browser-data
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Capture stable browser headers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
+      - uses: browser-actions/setup-edge@v1
+        id: edge
+        with:
+          edge-version: stable
+      - uses: browser-actions/setup-firefox@v1
+        id: firefox
+        with:
+          firefox-version: latest
+      - name: Install virtual display
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+      - name: Capture direct navigations through a local proxy
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          EDGE: ${{ steps.edge.outputs.edge-path }}
+          FIREFOX: ${{ steps.firefox.outputs.firefox-path }}
+        run: |
+          xvfb-run -a python3 tools/capture.py chrome --binary "$CHROME"
+          xvfb-run -a python3 tools/capture.py edge --binary "$EDGE"
+          xvfb-run -a python3 tools/capture.py firefox --binary "$FIREFOX"
+      - name: Generate offline data and verify profiles
+        run: |
+          python3 tools/update.py
+          cargo test -p uagents --all-features
+          cargo clippy -p uagents --all-features --all-targets -- -D warnings
+      - name: Propose capture updates
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.BROWSER_DATA_TOKEN || github.token }}
+          branch: bot/uagents-browser-data
+          title: "chore(uagents): refresh browser capture data"
+          commit-message: "chore(uagents): refresh browser capture data"
+          add-paths: |
+            tests/captures/*.json
+            src/data.rs
+          body: |
+            Refresh stable Chrome, Edge and Firefox navigation headers captured
+            through the local proxy, and regenerate the bundled offline data.
+
+            Profile tests and Clippy passed. Review
+            header changes and release the data in a uagents patch release.
+            Safari captures are maintained separately on macOS.
