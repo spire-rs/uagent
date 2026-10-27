@@ -66,7 +66,7 @@ jobs:
           cargo clippy -p uagent --all-features --all-targets -- -D warnings
 
       - name: Propose capture updates
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.BROWSER_DATA_TOKEN || github.token }}
           branch: bot/uagent-browser-data
