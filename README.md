@@ -6,8 +6,8 @@
 
 **Check out other `spire` projects [here](https://github.com/spire-rs).**
 
-[action-badge]: https://img.shields.io/github/actions/workflow/status/spire-rs/uagents/build.yml?branch=main&label=build&logo=github&style=flat-square
-[action-url]: https://github.com/spire-rs/uagents/actions/workflows/build.yml
+[action-badge]: https://img.shields.io/github/actions/workflow/status/spire-rs/uagent/build.yml?branch=main&label=build&logo=github&style=flat-square
+[action-url]: https://github.com/spire-rs/uagent/actions/workflows/build.yml
 [crates-badge]: https://img.shields.io/crates/v/uagent.svg?logo=rust&style=flat-square
 [crates-url]: https://crates.io/crates/uagent
 [docs-badge]: https://img.shields.io/docsrs/uagent?logo=Docs.rs&style=flat-square
@@ -73,7 +73,7 @@ assert_eq!(agents.pick(42), agents.pick(42));
   on RFC-Editor.org
 - [User-Agent Client Hints](https://developer.chrome.com/docs/privacy-security/user-agent-client-hints)
   on Chrome for Developers
-- [Browser capture guide](https://github.com/spire-rs/uagents/tree/main/tools)
+- [Browser capture guide](https://github.com/spire-rs/uagent/tree/main/tools)
   in this repository
 
 ### Notes

@@ -41,12 +41,12 @@ cargo install cargo-deny cargo-machete --locked
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/uagents.git
-   cd uagents
+   git clone https://github.com/YOUR_USERNAME/uagent.git
+   cd uagent
    ```
 3. Add the upstream repository:
    ```bash
-   git remote add upstream https://github.com/spire-rs/uagents.git
+   git remote add upstream https://github.com/spire-rs/uagent.git
    ```
 
 ## Development Setup
@@ -161,9 +161,9 @@ To release the crate:
    changes while it is below 1.0, the patch version otherwise.
 2. Move the `CHANGELOG.md` entries under the new version and date.
 3. Merge the changes into `main`.
-4. Run the **Release** workflow from the Actions tab. It publishes the crate
-   to crates.io and creates a `uagent-v<version>` GitHub release. The repository
-   needs a `CRATES_TOKEN` secret for publishing.
+4. Create and push a `v<version>` tag on `main`, such as `v0.1.0`. The **Release**
+   workflow creates the GitHub release and publishes the crate to crates.io.
+   The repository needs a `CRATES_TOKEN` secret for publishing.
 
 ## Reporting Bugs
 
