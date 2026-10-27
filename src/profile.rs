@@ -1,4 +1,6 @@
-use crate::{Browser, Error, Platform, Result, data, language};
+use std::borrow::Cow;
+
+use crate::{Browser, Error, Header, Platform, Result, language};
 
 /// A browser version and platform with navigation headers for a page opened directly.
 ///
@@ -83,9 +85,11 @@ impl Profile {
     /// fixed platform descriptions.
     #[must_use]
     pub fn user_agent(&self) -> String {
-        let template = data::headers(self.browser)
+        let template = self
+            .browser
+            .headers()
             .iter()
-            .find_map(|&(name, value)| (name == "user-agent").then_some(value))
+            .find_map(|header| (header.name == "user-agent").then_some(header.value.as_ref()))
             .unwrap_or_else(|| unreachable!("every browser capture has a user agent"));
         let latest = self.browser.latest();
         let version = self.version;
@@ -168,24 +172,30 @@ impl Profile {
     /// Header order is a convenience for clients that support it; an HTTP header
     /// map does not preserve it.
     #[must_use]
-    pub fn headers(&self) -> Vec<(&'static str, String)> {
-        data::headers(self.browser)
+    pub fn headers(&self) -> Vec<Header> {
+        self.browser
+            .headers()
             .iter()
-            .map(|&(name, value)| {
-                let value = match name {
-                    "user-agent" => self.user_agent(),
-                    "sec-ch-ua" => self.brands(),
-                    "sec-ch-ua-mobile" => if self.platform.is_mobile() {
+            .map(|header| {
+                let value = match header.name {
+                    "user-agent" => Cow::Owned(self.user_agent()),
+                    "sec-ch-ua" => Cow::Owned(self.brands()),
+                    "sec-ch-ua-mobile" => Cow::Borrowed(if self.platform.is_mobile() {
                         "?1"
                     } else {
                         "?0"
-                    }
-                    .to_owned(),
-                    "sec-ch-ua-platform" => self.platform.client_hint().to_owned(),
-                    "accept-language" => self.language.clone().unwrap_or_else(|| value.to_owned()),
-                    _ => value.to_owned(),
+                    }),
+                    "sec-ch-ua-platform" => Cow::Borrowed(self.platform.client_hint()),
+                    "accept-language" => self.language.as_ref().map_or_else(
+                        || header.value.clone(),
+                        |language| Cow::Owned(language.clone()),
+                    ),
+                    _ => header.value.clone(),
                 };
-                (name, value)
+                Header {
+                    name: header.name,
+                    value,
+                }
             })
             .collect()
     }

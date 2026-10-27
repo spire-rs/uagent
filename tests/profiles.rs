@@ -41,7 +41,7 @@ fn every_header_matches_the_latest_real_browser_capture() {
         let actual: Vec<_> = profile
             .headers()
             .into_iter()
-            .map(|(name, value)| (name.to_owned(), value))
+            .map(|header| (header.name.to_owned(), header.value.into_owned()))
             .collect();
         assert_eq!(actual, capture.headers, "{browser:?}");
     }
@@ -51,7 +51,11 @@ fn every_header_matches_the_latest_real_browser_capture() {
 fn chromium_hints_follow_the_published_version_141_example() {
     // https://developer.chrome.com/blog/user-agent-reduction-android-model-and-version
     let profile = Profile::new(Browser::Chrome, 141, Platform::Windows).unwrap();
-    let headers: HashMap<_, _> = profile.headers().into_iter().collect();
+    let headers: HashMap<_, _> = profile
+        .headers()
+        .into_iter()
+        .map(|header| (header.name, header.value.into_owned()))
+        .collect();
     assert_eq!(
         headers["sec-ch-ua"],
         r#""Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141""#
@@ -59,7 +63,11 @@ fn chromium_hints_follow_the_published_version_141_example() {
     assert_eq!(headers["sec-ch-ua-platform"], "\"Windows\"");
     assert_eq!(headers["sec-ch-ua-mobile"], "?0");
     let edge = Profile::new(Browser::Edge, 141, Platform::Windows).unwrap();
-    let headers: HashMap<_, _> = edge.headers().into_iter().collect();
+    let headers: HashMap<_, _> = edge
+        .headers()
+        .into_iter()
+        .map(|header| (header.name, header.value.into_owned()))
+        .collect();
     assert_eq!(
         headers["sec-ch-ua"],
         r#""Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141""#
@@ -69,9 +77,21 @@ fn chromium_hints_follow_the_published_version_141_example() {
 #[test]
 fn all_supported_platforms_produce_consistent_profiles() {
     for browser in Browser::ALL {
-        for &platform in browser.platforms() {
-            let profile = Profile::new(browser, browser.latest(), platform).unwrap();
-            let headers: HashMap<_, _> = profile.headers().into_iter().collect();
+        for platform in Platform::ALL {
+            let profile = Profile::new(browser, browser.latest(), platform);
+            if !browser.platforms().contains(&platform) {
+                assert_eq!(
+                    profile,
+                    Err(Error::UnsupportedPlatform { browser, platform })
+                );
+                continue;
+            }
+            let profile = profile.unwrap();
+            let headers: HashMap<_, _> = profile
+                .headers()
+                .into_iter()
+                .map(|header| (header.name, header.value.into_owned()))
+                .collect();
             assert_eq!(headers["user-agent"], profile.user_agent());
             assert!(!headers.contains_key("accept-encoding"));
             assert!(!headers.contains_key("host"));
@@ -79,7 +99,7 @@ fn all_supported_platforms_produce_consistent_profiles() {
             if matches!(browser, Browser::Chrome | Browser::Edge) {
                 assert_eq!(
                     headers["sec-ch-ua-mobile"],
-                    if platform == Platform::Android {
+                    if Platform::MOBILE.contains(&platform) {
                         "?1"
                     } else {
                         "?0"
@@ -112,6 +132,7 @@ fn language_overrides_work_for_profiles_and_picks() {
             .unwrap()
             .headers()
             .into_iter()
+            .map(|header| (header.name, header.value.into_owned()))
             .collect::<HashMap<_, _>>()["accept-language"],
         "de-DE,de;q=0.9"
     );
@@ -124,7 +145,11 @@ fn language_overrides_work_for_profiles_and_picks() {
     }
     let picked = UserAgents::new().language("fr-FR").unwrap().pick(42);
     assert_eq!(
-        picked.headers().into_iter().collect::<HashMap<_, _>>()["accept-language"],
+        picked
+            .headers()
+            .into_iter()
+            .map(|header| (header.name, header.value.into_owned()))
+            .collect::<HashMap<_, _>>()["accept-language"],
         "fr-FR"
     );
 }
@@ -147,7 +172,11 @@ fn language_tags_wildcards_and_quality_values_are_validated() {
         "en\t;\tQ=0.5",
     ] {
         let updated = profile.clone().with_language(valid).unwrap();
-        let headers: HashMap<_, _> = updated.headers().into_iter().collect();
+        let headers: HashMap<_, _> = updated
+            .headers()
+            .into_iter()
+            .map(|header| (header.name, header.value.into_owned()))
+            .collect();
         assert_eq!(headers["accept-language"], valid);
         assert!(UserAgents::new().language(valid).is_ok(), "{valid:?}");
     }

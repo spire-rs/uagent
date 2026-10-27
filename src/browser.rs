@@ -1,4 +1,4 @@
-use crate::{Platform, data};
+use crate::{Header, Platform, generated};
 
 /// A browser a [`Profile`](crate::Profile) presents as.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -18,14 +18,24 @@ impl Browser {
     /// All browsers with profile templates.
     pub const ALL: [Self; 4] = [Self::Chrome, Self::Edge, Self::Firefox, Self::Safari];
 
+    /// Returns the latest captured navigation header template.
+    pub(crate) const fn headers(self) -> &'static [Header] {
+        match self {
+            Self::Chrome => generated::CHROME_HEADERS,
+            Self::Edge => generated::EDGE_HEADERS,
+            Self::Firefox => generated::FIREFOX_HEADERS,
+            Self::Safari => generated::SAFARI_HEADERS,
+        }
+    }
+
     /// The newest major version in this release's capture data.
     #[must_use]
     pub const fn latest(self) -> u32 {
         match self {
-            Self::Chrome => data::CHROME_LATEST,
-            Self::Edge => data::EDGE_LATEST,
-            Self::Firefox => data::FIREFOX_LATEST,
-            Self::Safari => data::SAFARI_LATEST,
+            Self::Chrome => generated::CHROME_LATEST,
+            Self::Edge => generated::EDGE_LATEST,
+            Self::Firefox => generated::FIREFOX_LATEST,
+            Self::Safari => generated::SAFARI_LATEST,
         }
     }
 

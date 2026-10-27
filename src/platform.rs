@@ -15,8 +15,18 @@ pub enum Platform {
 }
 
 impl Platform {
+    /// All platforms with browser profile templates.
+    pub const ALL: [Self; 5] = [
+        Self::Windows,
+        Self::MacOs,
+        Self::Linux,
+        Self::Android,
+        Self::Ios,
+    ];
     /// The desktop platforms.
     pub const DESKTOP: [Self; 3] = [Self::Windows, Self::MacOs, Self::Linux];
+    /// The mobile platforms.
+    pub const MOBILE: [Self; 2] = [Self::Android, Self::Ios];
 
     pub(crate) const fn is_mobile(self) -> bool {
         matches!(self, Self::Android | Self::Ios)

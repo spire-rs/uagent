@@ -28,9 +28,9 @@ use uagents::{Browser, Platform, Profile};
 let profile = Profile::new(Browser::Chrome, 156, Platform::Windows)?;
 assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
 
-// Header names and values are returned in capture order.
-for (name, value) in profile.headers() {
-    println!("{name}: {value}");
+// Header structs are returned in capture order.
+for header in profile.headers() {
+    println!("{}: {}", header.name, header.value);
 }
 # Ok::<(), uagents::Error>(())
 ```
@@ -42,8 +42,8 @@ use uagents::{Browser, Platform, Profile};
 
 let profile = Profile::new(Browser::Firefox, 154, Platform::MacOs)?
     .with_language("de-DE,de;q=0.9")?;
-assert!(profile.headers().iter().any(|(name, value)| {
-    *name == "accept-language" && value == "de-DE,de;q=0.9"
+assert!(profile.headers().iter().any(|header| {
+    header.name == "accept-language" && header.value == "de-DE,de;q=0.9"
 }));
 # Ok::<(), uagents::Error>(())
 ```
