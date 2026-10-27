@@ -9,10 +9,10 @@ use crate::{Browser, Error, Header, Platform, Result, language};
 /// TLS, HTTP/2, or the browser's networking stack.
 ///
 /// ```
-/// use uagents::{Browser, Platform, Profile};
+/// use uagent::{Browser, Platform, Profile};
 /// let profile = Profile::new(Browser::Chrome, 156, Platform::Windows)?;
 /// assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
-/// # Ok::<_, uagents::Error>(())
+/// # Ok::<_, uagent::Error>(())
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Profile {

@@ -1,4 +1,4 @@
-## uagents
+## uagent
 
 [![Build Status][action-badge]][action-url]
 [![Crate Docs][docs-badge]][docs-url]
@@ -8,10 +8,10 @@
 
 [action-badge]: https://img.shields.io/github/actions/workflow/status/spire-rs/uagents/build.yml?branch=main&label=build&logo=github&style=flat-square
 [action-url]: https://github.com/spire-rs/uagents/actions/workflows/build.yml
-[crates-badge]: https://img.shields.io/crates/v/uagents.svg?logo=rust&style=flat-square
-[crates-url]: https://crates.io/crates/uagents
-[docs-badge]: https://img.shields.io/docsrs/uagents?logo=Docs.rs&style=flat-square
-[docs-url]: https://docs.rs/uagents
+[crates-badge]: https://img.shields.io/crates/v/uagent.svg?logo=rust&style=flat-square
+[crates-url]: https://crates.io/crates/uagent
+[docs-badge]: https://img.shields.io/docsrs/uagent?logo=Docs.rs&style=flat-square
+[docs-url]: https://docs.rs/uagent
 
 Browser profiles for Chrome, Edge, Firefox and Safari in the Rust programming
 language, with user agents, matching navigation headers and deterministic
@@ -23,7 +23,7 @@ the crate and require no data fetch during builds or at runtime.
 - create a browser profile and read its navigation headers:
 
 ```rust
-use uagents::{Browser, Platform, Profile};
+use uagent::{Browser, Platform, Profile};
 
 let profile = Profile::new(Browser::Chrome, 156, Platform::Windows)?;
 assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
@@ -32,26 +32,26 @@ assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
 for header in profile.headers() {
     println!("{}: {}", header.name, header.value);
 }
-# Ok::<(), uagents::Error>(())
+# Ok::<(), uagent::Error>(())
 ```
 
 - override the language preferences, validating BCP 47 tags and quality values:
 
 ```rust
-use uagents::{Browser, Platform, Profile};
+use uagent::{Browser, Platform, Profile};
 
 let profile = Profile::new(Browser::Firefox, 154, Platform::MacOs)?
     .with_language("de-DE,de;q=0.9")?;
 assert!(profile.headers().iter().any(|header| {
     header.name == "accept-language" && header.value == "de-DE,de;q=0.9"
 }));
-# Ok::<(), uagents::Error>(())
+# Ok::<(), uagent::Error>(())
 ```
 
 - pick a profile for each crawler identity, deterministically by its number:
 
 ```rust
-use uagents::{Browser, Platform, UserAgents};
+use uagent::{Browser, Platform, UserAgents};
 
 let agents = UserAgents::new()
     .browsers([Browser::Chrome, Browser::Firefox])
@@ -61,7 +61,7 @@ let agents = UserAgents::new()
     .language("en-US,en;q=0.9")?;
 
 assert_eq!(agents.pick(42), agents.pick(42));
-# Ok::<(), uagents::Error>(())
+# Ok::<(), uagent::Error>(())
 ```
 
 ### Links

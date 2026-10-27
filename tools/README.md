@@ -17,7 +17,7 @@ python3 tools/capture.py edge --binary /path/to/msedge
 python3 tools/capture.py firefox --binary /path/to/firefox
 python3 tools/capture_safari.py
 python3 tools/update.py
-cargo test -p uagents
+cargo test -p uagent
 ```
 
 ### Notes

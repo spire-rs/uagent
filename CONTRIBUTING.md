@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to uagents! We appreciate your help in
+Thank you for your interest in contributing to uagent! We appreciate your help in
 making this crate better.
 
 ## Table of Contents
@@ -130,8 +130,8 @@ cargo +1.90.0 check --all-features
 1. Commit your changes with [Conventional Commits](https://www.conventionalcommits.org)
    messages:
    ```bash
-   git commit -m "fix(uagents): reject invalid language preferences"
-   git commit -m "feat(uagents): add browser profiles"
+   git commit -m "fix(uagent): reject invalid language preferences"
+   git commit -m "feat(uagent): add browser profiles"
    git commit -m "chore(deps): update dependencies"
    ```
 
@@ -162,7 +162,7 @@ To release the crate:
 2. Move the `CHANGELOG.md` entries under the new version and date.
 3. Merge the changes into `main`.
 4. Run the **Release** workflow from the Actions tab. It publishes the crate
-   to crates.io and creates a `uagents-v<version>` GitHub release. The repository
+   to crates.io and creates a `uagent-v<version>` GitHub release. The repository
    needs a `CRATES_TOKEN` secret for publishing.
 
 ## Reporting Bugs
@@ -192,7 +192,7 @@ If you find a bug, please create an issue on GitHub with:
 
 **Environment**
 
-- Crate and version: [e.g. uagents 0.1.0]
+- Crate and version: [e.g. uagent 0.1.0]
 - Rust version: [e.g. 1.90.0]
 - OS: [e.g. Ubuntu 24.04]
 

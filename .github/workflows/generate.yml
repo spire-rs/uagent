@@ -62,16 +62,16 @@ jobs:
       - name: Generate offline data and verify profiles
         run: |
           python3 tools/update.py
-          cargo test -p uagents --all-features
-          cargo clippy -p uagents --all-features --all-targets -- -D warnings
+          cargo test -p uagent --all-features
+          cargo clippy -p uagent --all-features --all-targets -- -D warnings
 
       - name: Propose capture updates
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.BROWSER_DATA_TOKEN || github.token }}
-          branch: bot/uagents-browser-data
-          title: "chore(uagents): refresh browser capture data"
-          commit-message: "chore(uagents): refresh browser capture data"
+          branch: bot/uagent-browser-data
+          title: "chore(uagent): refresh browser capture data"
+          commit-message: "chore(uagent): refresh browser capture data"
           add-paths: |
             tests/captures/*.json
             src/generated.rs
@@ -80,5 +80,5 @@ jobs:
             through the local proxy, and regenerate the bundled offline data.
 
             Profile tests and Clippy passed. Review
-            header changes and release the data in a uagents patch release.
+            header changes and release the data in a uagent patch release.
             Safari captures are maintained separately on macOS.

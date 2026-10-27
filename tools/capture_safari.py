@@ -35,7 +35,7 @@ def main():
         session = None
         try:
             if args.manual:
-                subprocess.run(["open", "-a", "Safari", f"http://localhost:{server.server_port}/uagents-capture"], check=True)
+                subprocess.run(["open", "-a", "Safari", f"http://localhost:{server.server_port}/uagent-capture"], check=True)
             for _ in range(0 if args.manual else 50):
                 try:
                     webdriver("/status")
@@ -44,7 +44,7 @@ def main():
                     time.sleep(0.1)
             if not args.manual:
                 session = webdriver("/session", {"capabilities": {"alwaysMatch": {"browserName": "safari"}}})["sessionId"]
-                webdriver(f"/session/{session}/url", {"url": f"http://localhost:{server.server_port}/uagents-capture"})
+                webdriver(f"/session/{session}/url", {"url": f"http://localhost:{server.server_port}/uagent-capture"})
             headers = received.get(timeout=30)
             version = int(re.search(r"Version/(\d+)", dict(headers)["user-agent"])[1])
             output = pathlib.Path(f"tests/captures/safari-{version}-macos.json")

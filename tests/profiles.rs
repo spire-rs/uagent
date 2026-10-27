@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use serde::Deserialize;
-use uagents::{Browser, Error, Platform, Profile, UserAgents};
+use uagent::{Browser, Error, Platform, Profile, UserAgents};
 
 #[derive(Deserialize)]
 struct Capture {

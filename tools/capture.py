@@ -20,7 +20,7 @@ from capture_server import capture_server
 def capture(browser, binary, output):
     with capture_server() as (server, received):
         port = server.server_port
-        with tempfile.TemporaryDirectory(prefix="uagents-") as profile:
+        with tempfile.TemporaryDirectory(prefix="uagent-") as profile:
             if browser == "firefox":
                 prefs = {
                     "network.proxy.type": 1,
@@ -48,7 +48,7 @@ def capture(browser, binary, output):
                     "--proxy-bypass-list=<-loopback>", "--lang=en-US",
                 ]
             process = subprocess.Popen(
-                [*command, "http://localhost/uagents-capture"],
+                [*command, "http://localhost/uagent-capture"],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
             try:

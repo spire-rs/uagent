@@ -10,7 +10,7 @@ use crate::{Browser, Platform, Profile, Result, language};
 /// version when resuming a crawl must retain exactly the same headers.
 ///
 /// ```
-/// use uagents::{Browser, UserAgents};
+/// use uagent::{Browser, UserAgents};
 /// let agents = UserAgents::new().browsers([Browser::Chrome, Browser::Firefox]);
 /// assert_eq!(agents.pick(7), agents.pick(7));
 /// ```
@@ -33,7 +33,7 @@ impl Default for UserAgents {
                 Browser::Edge,
                 Browser::Firefox,
             ]
-            .map(|browser| (browser, default_share(browser)))
+            .map(|browser| (browser, browser.default_share()))
             .to_vec(),
             platforms: Platform::DESKTOP.to_vec(),
             versions: Vec::new(),
@@ -74,7 +74,7 @@ impl UserAgents {
                     .browsers
                     .iter()
                     .find(|(other, _)| *other == browser)
-                    .map_or_else(|| default_share(browser), |(_, share)| *share);
+                    .map_or_else(|| browser.default_share(), |(_, share)| *share);
                 (browser, share)
             })
             .collect();
@@ -176,7 +176,7 @@ impl UserAgents {
             .iter()
             .copied()
             .filter(|platform| self.platforms.contains(platform))
-            .map(|platform| (platform, share(browser, platform)))
+            .map(|platform| (platform, browser.share(platform)))
             .collect();
         let platform = weighted(&platforms, draws.next());
 
@@ -185,7 +185,7 @@ impl UserAgents {
             .iter()
             .find(|(other, _)| *other == browser)
             .map_or_else(
-                || default_versions(browser),
+                || browser.default_versions(),
                 |(_, versions)| versions.clone(),
             );
         let span = u64::from(versions.end() - versions.start()) + 1;
@@ -206,39 +206,6 @@ impl fmt::Debug for UserAgents {
             .field("platforms", &self.platforms)
             .field("versions", &self.versions)
             .finish_non_exhaustive()
-    }
-}
-
-/// How common `browser` is, relative to the others.
-const fn default_share(browser: Browser) -> u32 {
-    match browser {
-        Browser::Chrome => 65,
-        Browser::Safari => 18,
-        Browser::Edge => 10,
-        Browser::Firefox => 7,
-    }
-}
-
-/// A browser's latest two major versions, Safari's latest.
-fn default_versions(browser: Browser) -> RangeInclusive<u32> {
-    let latest = browser.latest();
-    match browser {
-        Browser::Safari => latest..=latest,
-        _ => latest - 1..=latest,
-    }
-}
-
-/// How common `platform` is among `browser`'s users.
-const fn share(browser: Browser, platform: Platform) -> u32 {
-    match (browser, platform) {
-        (Browser::Chrome | Browser::Firefox, Platform::Windows) => 70,
-        (Browser::Chrome, Platform::MacOs) => 22,
-        (Browser::Chrome, Platform::Linux) => 8,
-        (Browser::Firefox, Platform::MacOs | Platform::Linux) => 15,
-        (Browser::Edge, Platform::Windows) => 90,
-        (Browser::Edge, Platform::MacOs) => 9,
-        (Browser::Edge, Platform::Linux) => 1,
-        _ => 100,
     }
 }
 
