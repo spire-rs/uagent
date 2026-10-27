@@ -10,8 +10,8 @@ use crate::{Browser, Error, Header, Platform, Result, language};
 ///
 /// ```
 /// use uagent::{Browser, Platform, Profile};
-/// let profile = Profile::new(Browser::Chrome, 156, Platform::Windows)?;
-/// assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
+/// let profile = Profile::new(Browser::Chrome, Platform::Windows)?;
+/// assert_eq!(profile.version(), Browser::Chrome.latest());
 /// # Ok::<_, uagent::Error>(())
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,26 +23,44 @@ pub struct Profile {
 }
 
 impl Profile {
-    /// Creates the profile of `browser` at major `version` on `platform`.
+    /// Creates a profile of `browser` on `platform` at its latest bundled version.
     ///
     /// # Errors
     ///
-    /// Returns an error if the browser/platform combination has no template,
-    /// or `version` is zero. Versions other than the captured version use
-    /// the latest captured navigation headers with a substituted major version.
-    pub fn new(browser: Browser, version: u32, platform: Platform) -> Result<Self> {
+    /// Returns an error if the browser/platform combination has no template.
+    pub fn new(browser: Browser, platform: Platform) -> Result<Self> {
         if !browser.platforms().contains(&platform) {
             return Err(Error::UnsupportedPlatform { browser, platform });
         }
-        if version == 0 {
-            return Err(Error::InvalidVersion);
-        }
         Ok(Self {
             browser,
-            version,
+            version: browser.latest(),
             platform,
             language: None,
         })
+    }
+
+    /// Overrides the browser's major version.
+    ///
+    /// Other major versions reuse the latest captured navigation headers;
+    /// historical header changes are not modeled.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidVersion`] if `version` is zero.
+    pub fn with_version(mut self, version: u32) -> Result<Self> {
+        if version == 0 {
+            return Err(Error::InvalidVersion);
+        }
+        self.version = version;
+        Ok(self)
+    }
+
+    /// Restores the browser's latest bundled major version after an override.
+    #[must_use]
+    pub const fn with_latest_version(mut self) -> Self {
+        self.version = self.browser.latest();
+        self
     }
 
     /// Overrides the captured `Accept-Language` value.

@@ -25,8 +25,8 @@ the crate and require no data fetch during builds or at runtime.
 ```rust
 use uagent::{Browser, Platform, Profile};
 
-let profile = Profile::new(Browser::Chrome, 156, Platform::Windows)?;
-assert!(profile.user_agent().contains("Chrome/156.0.0.0"));
+let profile = Profile::new(Browser::Chrome, Platform::Windows)?;
+assert_eq!(profile.version(), Browser::Chrome.latest());
 
 // Header structs are returned in capture order.
 for header in profile.headers() {
@@ -40,7 +40,7 @@ for header in profile.headers() {
 ```rust
 use uagent::{Browser, Platform, Profile};
 
-let profile = Profile::new(Browser::Firefox, 154, Platform::MacOs)?
+let profile = Profile::new(Browser::Firefox, Platform::MacOs)?
     .with_language("de-DE,de;q=0.9")?;
 assert!(profile.headers().iter().any(|header| {
     header.name == "accept-language" && header.value == "de-DE,de;q=0.9"

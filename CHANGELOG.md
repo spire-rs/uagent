@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Browser`, `Platform` and `Profile` for Chrome, Edge, Firefox and Safari
   user agents and navigation headers, including Chromium client hints.
+- Latest-version defaults for `Profile::new`, with `Profile::with_version` and
+  `Profile::with_latest_version` to override and restore the bundled version.
 - `UserAgents` for deterministic profile selection by relative browser and
   platform weights, with configurable versions and language preferences.
 - `Header` for named header fields in captured data and generated profiles.

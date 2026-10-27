@@ -37,7 +37,7 @@ fn every_header_matches_the_latest_real_browser_capture() {
             other => panic!("unknown capture platform {other}"),
         };
         assert_eq!(browser.latest(), capture.version);
-        let profile = Profile::new(browser, capture.version, platform).unwrap();
+        let profile = Profile::new(browser, platform).unwrap();
         let actual: Vec<_> = profile
             .headers()
             .into_iter()
@@ -50,7 +50,10 @@ fn every_header_matches_the_latest_real_browser_capture() {
 #[test]
 fn chromium_hints_follow_the_published_version_141_example() {
     // https://developer.chrome.com/blog/user-agent-reduction-android-model-and-version
-    let profile = Profile::new(Browser::Chrome, 141, Platform::Windows).unwrap();
+    let profile = Profile::new(Browser::Chrome, Platform::Windows)
+        .unwrap()
+        .with_version(141)
+        .unwrap();
     let headers: HashMap<_, _> = profile
         .headers()
         .into_iter()
@@ -62,7 +65,10 @@ fn chromium_hints_follow_the_published_version_141_example() {
     );
     assert_eq!(headers["sec-ch-ua-platform"], "\"Windows\"");
     assert_eq!(headers["sec-ch-ua-mobile"], "?0");
-    let edge = Profile::new(Browser::Edge, 141, Platform::Windows).unwrap();
+    let edge = Profile::new(Browser::Edge, Platform::Windows)
+        .unwrap()
+        .with_version(141)
+        .unwrap();
     let headers: HashMap<_, _> = edge
         .headers()
         .into_iter()
@@ -78,7 +84,7 @@ fn chromium_hints_follow_the_published_version_141_example() {
 fn all_supported_platforms_produce_consistent_profiles() {
     for browser in Browser::ALL {
         for platform in Platform::ALL {
-            let profile = Profile::new(browser, browser.latest(), platform);
+            let profile = Profile::new(browser, platform);
             if !browser.platforms().contains(&platform) {
                 assert_eq!(
                     profile,
@@ -112,19 +118,21 @@ fn all_supported_platforms_produce_consistent_profiles() {
         }
     }
     assert!(matches!(
-        Profile::new(Browser::Chrome, 0, Platform::Linux),
+        Profile::new(Browser::Chrome, Platform::Linux)
+            .unwrap()
+            .with_version(0),
         Err(Error::InvalidVersion)
     ));
     assert!(matches!(
-        Profile::new(Browser::Safari, 26, Platform::Windows),
+        Profile::new(Browser::Safari, Platform::Windows),
         Err(Error::UnsupportedPlatform { .. })
     ));
-    assert!(Profile::new(Browser::Firefox, 154, Platform::Ios).is_err());
+    assert!(Profile::new(Browser::Firefox, Platform::Ios).is_err());
 }
 
 #[test]
 fn language_overrides_work_for_profiles_and_picks() {
-    let profile = Profile::new(Browser::Chrome, 156, Platform::MacOs).unwrap();
+    let profile = Profile::new(Browser::Chrome, Platform::MacOs).unwrap();
     assert_eq!(
         profile
             .clone()
@@ -156,7 +164,7 @@ fn language_overrides_work_for_profiles_and_picks() {
 
 #[test]
 fn language_tags_wildcards_and_quality_values_are_validated() {
-    let profile = Profile::new(Browser::Chrome, 156, Platform::MacOs).unwrap();
+    let profile = Profile::new(Browser::Chrome, Platform::MacOs).unwrap();
     for valid in [
         "en",
         "zh-Hant-TW",
@@ -302,4 +310,24 @@ fn invalid_selections_fail_during_configuration() {
             .share(Browser::Chrome, 0))
         .is_err()
     );
+}
+
+#[test]
+fn profiles_default_to_latest_and_can_restore_it_after_version_overrides() {
+    for browser in Browser::ALL {
+        let original = Profile::new(browser, browser.platforms()[0])
+            .unwrap()
+            .with_language("de-DE,de;q=0.9")
+            .unwrap();
+        assert_eq!(original.version(), browser.latest());
+        for version in [1, browser.latest() - 1, u32::MAX] {
+            let overridden = original.clone().with_version(version).unwrap();
+            assert_eq!(overridden.version(), version);
+            let restored = overridden.with_latest_version();
+            assert_eq!(restored, original);
+            assert_eq!(restored.headers(), original.headers());
+        }
+        assert_eq!(original.clone().with_latest_version(), original);
+        assert_eq!(original.with_version(0), Err(Error::InvalidVersion));
+    }
 }

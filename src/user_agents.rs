@@ -192,7 +192,8 @@ impl UserAgents {
         let offset = u32::try_from(draws.next() % span).unwrap_or_default();
         let version = versions.start() + offset;
 
-        let mut profile = Profile::new(browser, version, platform)
+        let mut profile = Profile::new(browser, platform)
+            .and_then(|profile| profile.with_version(version))
             .unwrap_or_else(|_| unreachable!("browsers are only picked on their platforms"));
         profile.language.clone_from(&self.language);
         profile
