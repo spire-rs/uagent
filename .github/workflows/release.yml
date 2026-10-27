@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish uagent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry and build
+        uses: Swatinem/rust-cache@v2
+
+      # Runs before publishing, so a missing version stops the release.
+      # `cargo metadata --no-deps` needs no Cargo.lock, which is not committed.
+      - name: Get version
+        id: version
+        env:
+          CRATE: uagent
+        run: |
+          set -euo pipefail
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -er --arg crate "$CRATE" '.packages[] | select(.name == $crate) | .version')
+          echo "VERSION=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        run: cargo publish -p uagent
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
+
+      - name: Create release
+        run: |
+          gh release create uagent-v${{ steps.version.outputs.VERSION }} \
+            --title "uagent v${{ steps.version.outputs.VERSION }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

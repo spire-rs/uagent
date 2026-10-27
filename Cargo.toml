@@ -1,0 +1,34 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "uagent"
+version = "0.1.0"
+readme = "./README.md"
+exclude = ["**/__pycache__/**"]
+description = "Browser user agents with matching navigation headers and deterministic profile selection."
+keywords = ["user-agent", "browser", "crawler", "headers", "scraper"]
+categories = ["web-programming"]
+
+rust-version = "1.90"
+edition = "2024"
+license = "MIT"
+
+authors = ["Oleh Martsokha <o.martsokha@gmail.com>"]
+repository = "https://github.com/spire-rs/uagents"
+documentation = "https://docs.rs/uagent"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+# Domain datatypes
+oxilangtag = { version = "0.1", features = [] }
+
+[dev-dependencies]
+# (De)serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = [] }
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
