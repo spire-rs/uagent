@@ -152,11 +152,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Find baseline crate
+        id: baseline
+        env:
+          BASE_REV: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git cat-file -e "$BASE_REV:Cargo.toml" 2>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No baseline crate exists yet; skipping the initial API comparison."
+          fi
 
       - name: Check semver
+        if: steps.baseline.outputs.exists == 'true'
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
           feature-group: all-features
+          baseline-rev: ${{ github.event.pull_request.base.sha }}
 
   machete:
     name: Machete
